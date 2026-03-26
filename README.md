@@ -115,18 +115,20 @@ SwaggerToMarkdownTool --url https://test-server:8400/gateway/swagger-ui/index.ht
   - 响应状态码及响应体结构
 - 数据模型（Models）定义
 
-## 项目结构
+## 项目结构（仓库根目录）
 
 ```
+├── LICENSE                             # MIT 许可证全文
 ├── publish.ps1                         # 打包发布脚本
 ├── SwaggerToMarkdownTool/
 │   ├── Program.cs                      # 入口，命令行参数解析
 │   ├── SwaggerClient.cs                # HTTP 客户端，获取 Swagger JSON
 │   ├── MarkdownConverter.cs            # 将 Swagger JSON 转换为 Markdown
 │   └── SwaggerToMarkdownTool.csproj
-└── artifacts/                          # 打包产物输出目录（git 忽略）
+├── artifacts/                          # publish.ps1 产物输出目录（git 忽略）
+└── .release-gh-asset/                  # 本地 GitHub Release 资源（git 忽略）
 ```
 
-## License
+## 许可证
 
-MIT
+本项目采用 [MIT 许可证](https://opensource.org/licenses/MIT)。完整条款见仓库根目录下的 [LICENSE](LICENSE)。

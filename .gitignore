@@ -28,6 +28,9 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Local GitHub Release assets (executables, notes, etc.)
+.release-gh-asset/
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
