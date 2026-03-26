@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
+
+    <Version>1.0.0</Version>
+    <AssemblyName>SwaggerToMarkdownTool</AssemblyName>
+    <Description>Convert Swagger/OpenAPI specs to Markdown documents</Description>
   </PropertyGroup>
 
 </Project>
