@@ -533,6 +533,29 @@ public class MarkdownConverter
 
     // ──────────────────────── Type Resolution ────────────────────────
 
+    private static List<string>? ParseSchemaTypeList(JsonElement schema)
+    {
+        if (!schema.TryGetProperty("type", out var t)) return null;
+        return ParseTypeElementToList(t);
+    }
+
+    private static List<string>? ParseTypeElementToList(JsonElement t)
+    {
+        if (t.ValueKind == JsonValueKind.String)
+            return t.GetString() is { } s ? new List<string> { s } : null;
+
+        if (t.ValueKind != JsonValueKind.Array) return null;
+
+        var list = new List<string>();
+        foreach (var el in t.EnumerateArray())
+        {
+            if (el.ValueKind == JsonValueKind.String && el.GetString() is { } s)
+                list.Add(s);
+        }
+
+        return list.Count > 0 ? list : null;
+    }
+
     private string ResolveTypeName(JsonElement schema)
     {
         if (schema.TryGetProperty("$ref", out var refVal))
@@ -542,11 +565,11 @@ public class MarkdownConverter
             return refName;
         }
 
-        var type = schema.TryGetProperty("type", out var t) ? t.GetString() : null;
         var format = schema.TryGetProperty("format", out var f) ? f.GetString() : null;
+        var types = ParseSchemaTypeList(schema);
 
-        if (type == "array" && schema.TryGetProperty("items", out var items))
-            return $"{ResolveTypeName(items)}[]";
+        if (types != null && types.Contains("array") && schema.TryGetProperty("items", out var items))
+            return types.Contains("null") ? $"{ResolveTypeName(items)}[] | null" : $"{ResolveTypeName(items)}[]";
 
         if (schema.TryGetProperty("allOf", out var allOf))
         {
@@ -567,10 +590,25 @@ public class MarkdownConverter
         if (schema.TryGetProperty("additionalProperties", out var addProps))
             return $"Map<string, {ResolveTypeName(addProps)}>";
 
-        if (format != null)
-            return $"{type}({format})";
+        if (types != null && types.Count > 0)
+        {
+            var nonNull = types.Where(t => t != "null").Distinct().ToList();
+            var nullable = types.Contains("null");
+            if (nonNull.Count == 0)
+                return "null";
 
-        return type ?? "object";
+            string FormatPrimitive(string t) =>
+                nonNull.Count == 1 && format != null ? $"{t}({format})" : t;
+
+            var parts = nonNull.Select(FormatPrimitive).ToList();
+            var core = parts.Count == 1 ? parts[0] : string.Join(" | ", parts);
+            return nullable ? $"{core} | null" : core;
+        }
+
+        if (format != null)
+            return $"({format})";
+
+        return "object";
     }
 
     private string ResolveParameterType(JsonElement param)
@@ -578,17 +616,34 @@ public class MarkdownConverter
         if (param.TryGetProperty("schema", out var schema))
             return ResolveTypeName(schema);
 
-        var type = param.TryGetProperty("type", out var t) ? t.GetString() : null;
         var format = param.TryGetProperty("format", out var f) ? f.GetString() : null;
+        var types = ParseSchemaTypeList(param);
 
-        if (type == "array" && param.TryGetProperty("items", out var items))
+        if (types != null && types.Contains("array") && param.TryGetProperty("items", out var items))
         {
-            var itemType = items.TryGetProperty("type", out var it) ? it.GetString() : "object";
-            return $"{itemType}[]";
+            var arr = $"{ResolveTypeName(items)}[]";
+            return types.Contains("null") ? $"{arr} | null" : arr;
         }
 
-        if (format != null) return $"{type}({format})";
-        return type ?? "string";
+        if (types != null && types.Count > 0)
+        {
+            var nonNull = types.Where(t => t != "null").Distinct().ToList();
+            var nullable = types.Contains("null");
+            if (nonNull.Count == 0)
+                return "null";
+
+            string FormatPrimitive(string t) =>
+                nonNull.Count == 1 && format != null ? $"{t}({format})" : t;
+
+            var parts = nonNull.Select(FormatPrimitive).ToList();
+            var core = parts.Count == 1 ? parts[0] : string.Join(" | ", parts);
+            return nullable ? $"{core} | null" : core;
+        }
+
+        if (format != null)
+            return $"({format})";
+
+        return "string";
     }
 
     private JsonElement? ResolveRef(JsonElement element)
@@ -668,7 +723,8 @@ public class MarkdownConverter
 
     private static bool HasType(JsonElement schema, string type)
     {
-        return schema.TryGetProperty("type", out var t) && t.GetString() == type;
+        var types = ParseSchemaTypeList(schema);
+        return types != null && types.Contains(type);
     }
 
     private static string ExtractRefName(string refPath)
