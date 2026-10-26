@@ -32,6 +32,8 @@ dotnet publish -c Release -r win-x64 --self-contained true
 
 项目提供 `publish.ps1` 脚本，可一键构建并打包为压缩包（Windows 为 `.zip`，Linux/macOS 为 `.tar.gz`）。
 
+macOS Apple Silicon 的发布配置在 `SwaggerToMarkdownTool/Properties/PublishProfiles/osx-arm64.pubxml`。在 macOS 上发布时使用 Native AOT；在 Windows 或 Linux 上交叉发布时，SDK 不支持跨操作系统的 Native AOT，会改为生成自包含单文件，解压后可在 Apple Silicon Mac 上直接运行。
+
 打包当前平台：
 
 ```powershell
@@ -62,12 +64,12 @@ SwaggerToMarkdownTool --url <swagger-url> [--output <file>] [--skip-ssl]
 
 ### 参数说明
 
-| 参数 | 说明 | 必填 | 默认值 |
-|------|------|------|--------|
-| `--url` | Swagger UI 页面地址或 API docs JSON 地址 | 是 | — |
-| `--output` / `-o` | 输出的 Markdown 文件路径 | 否 | `swagger.md` |
-| `--skip-ssl` | 跳过 SSL 证书校验 | 否 | — |
-| `--help` / `-h` | 显示帮助信息 | 否 | — |
+| 参数              | 说明                                     | 必填 | 默认值       |
+| ----------------- | ---------------------------------------- | ---- | ------------ |
+| `--url`           | Swagger UI 页面地址或 API docs JSON 地址 | 是   | —            |
+| `--output` / `-o` | 输出的 Markdown 文件路径                 | 否   | `swagger.md` |
+| `--skip-ssl`      | 跳过 SSL 证书校验                        | 否   | —            |
+| `--help` / `-h`   | 显示帮助信息                             | 否   | —            |
 
 ### 示例
 

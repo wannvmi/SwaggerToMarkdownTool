@@ -13,4 +13,16 @@
     <Description>Convert Swagger/OpenAPI specs to Markdown documents</Description>
   </PropertyGroup>
 
+  <!-- Native AOT cannot be cross-compiled onto another OS. -->
+  <PropertyGroup>
+    <_HostOs>$([System.String]::Copy('$(NETCoreSdkRuntimeIdentifier)').Split('-').GetValue(0))</_HostOs>
+    <_TargetOs Condition="'$(RuntimeIdentifier)' != ''">$([System.String]::Copy('$(RuntimeIdentifier)').Split('-').GetValue(0))</_TargetOs>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(_TargetOs)' != '' and '$(_HostOs)' != '$(_TargetOs)'">
+    <PublishAot>false</PublishAot>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
 </Project>

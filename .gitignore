@@ -64,3 +64,4 @@ nunit-*.xml
 
 # Cursor
 .cursor/
+SwaggerToMarkdownTool/Properties/launchSettings.json
